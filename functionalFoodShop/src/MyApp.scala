@@ -40,8 +40,8 @@ object MyApp extends App {
   def readOption: Int = {
     println(
       """|Please select one of the following:
-        |  1 - show points for all teams
-        |  2 - show points for selected team
+        |  1 - Get Most Recent Prices
+        |  2 -
         |  3 - quit""".stripMargin)
     readInt()
   }
@@ -60,12 +60,12 @@ object MyApp extends App {
 
   // handlers for menu options
   def handleOne(): Boolean = {
-    mnuShowPoints(currentPoints) // calls function mnuShowPoints, which invokes function currentPoints
+    mnuShowPrices(getCurrentPrice) // calls function mnuShowPoints, which invokes function currentPoints
     true
   }
 
   def handleTwo(): Boolean = {
-    mnuShowPointsForTeam(currentPointsForTeam)
+    //mnuShowPointsForTeam(currentPointsForTeam)
     true
   }
 
@@ -79,9 +79,10 @@ object MyApp extends App {
   // UTILITY FUNCTIONS
 
   // reads data file - comma separated file
-  def readFile(filename: String): Map[String, Int] = {
+  def readFile(filename: String): Map[String, List[Int]] = {
     // create buffer to build up map as we read each line
-    var mapBuffer: Map[String, Int] = Map()
+
+    var mapBuffer: Map[String, List[Int]] = Map()
     try {
       for (line <- Source.fromFile(filename).getLines()) {
         // for each line
@@ -91,7 +92,7 @@ object MyApp extends App {
         // splitline is line from file as List, e.g. List(Bayern Munich, 24)
         // use head as key
         // tail is a list, but need just the first (only in this case) element, so use head of tail and convert to int
-        mapBuffer = mapBuffer ++ Map(splitline.head -> splitline.tail.head.toInt)
+        mapBuffer = mapBuffer ++ Map(splitline.head -> splitline.tail.map(_.toInt))
 
       }
     } catch {
@@ -106,10 +107,10 @@ object MyApp extends App {
   // each of these functions accepts user input if required for an operation,
   // invokes the relevant operation function and displays the results
 
-  def mnuShowPoints(f: () => Map[String, Int]) = {
-    f() foreach { case (x, y) => println(s"$x: $y") }
+  def mnuShowPrices(f: () => Map[String, Int]) = {
+        f() map(x => println(x._1 + ": " + x._2 + "p"))
   }
-
+/*
   def mnuShowPointsForTeam(f: (String) => (String, Int)) = {
     print("Team>")
     val data = f(readLine)
@@ -120,13 +121,17 @@ object MyApp extends App {
   // OPERATION FUNCTIONS
   // each of these performs the required operation on the data and returns
   // the results to be displayed - does not interact with user
+*/
 
-  def currentPoints(): Map[String, Int] = {
-    // sort map by value in descending order -
-    // see http://alvinalexander.com/scala/how-to-sort-map-in-scala-key-value-sortby-sortwith
-    ListMap(mapdata.toSeq.sortWith(_._2 > _._2): _*)
+  def getCurrentPrice(): Map[String, Int] = {
+    val currentPriceMap :Map[String, Int]  = mapdata.map(x => x._1 -> x._2.last)
+
+    currentPriceMap
   }
 
+
+
+/*
   def currentPointsForTeam(team: String): (String, Int) = {
     val points = mapdata.get(team) match{
       case Some(p) => p
@@ -134,7 +139,7 @@ object MyApp extends App {
     }
     (team, points)
   }
-
+*/
 
   // *******************************************************************************************************************
 
