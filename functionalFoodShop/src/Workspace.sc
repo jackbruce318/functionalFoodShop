@@ -28,6 +28,6 @@ val mapdata = readFile("C:\\Users\\actio\\Documents\\GitHub\\functionalFoodShop\
 
 mapdata.map(x => x._2.last)
 
-val newMapData :Map[String, Int]  = mapdata.map(x => x._1 -> x._2.last)
+val newMapData :Map[String, List[Int]]  = mapdata.map(x => x._1 -> List(x._2.min,x._2.max))
 
 newMapData.map(x => println(x._1 + " " + x._2))

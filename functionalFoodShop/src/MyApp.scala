@@ -41,7 +41,7 @@ object MyApp extends App {
     println(
       """|Please select one of the following:
         |  1 - Get Most Recent Prices
-        |  2 -
+        |  2 - View Highest and Lowest Prices
         |  3 - quit""".stripMargin)
     readInt()
   }
@@ -65,7 +65,7 @@ object MyApp extends App {
   }
 
   def handleTwo(): Boolean = {
-    //mnuShowPointsForTeam(currentPointsForTeam)
+    mnuHighestLowest(getHighestLowest)
     true
   }
 
@@ -110,18 +110,16 @@ object MyApp extends App {
   def mnuShowPrices(f: () => Map[String, Int]) = {
         f() map(x => println(x._1 + ": " + x._2 + "p"))
   }
-/*
-  def mnuShowPointsForTeam(f: (String) => (String, Int)) = {
-    print("Team>")
-    val data = f(readLine)
-    println(s"${data._1}: ${data._2}")
+
+  def mnuHighestLowest(f: () => Map[String,List[Int]]) = {
+        f() map(x => println(x._1 + ": Lowest: " + x._2.min + "p - Highest: " + x._2.max + "p"))
   }
 
   // *******************************************************************************************************************
   // OPERATION FUNCTIONS
   // each of these performs the required operation on the data and returns
   // the results to be displayed - does not interact with user
-*/
+
 
   def getCurrentPrice(): Map[String, Int] = {
     val currentPriceMap :Map[String, Int]  = mapdata.map(x => x._1 -> x._2.last)
@@ -131,15 +129,12 @@ object MyApp extends App {
 
 
 
-/*
-  def currentPointsForTeam(team: String): (String, Int) = {
-    val points = mapdata.get(team) match{
-      case Some(p) => p
-      case None => 0
-    }
-    (team, points)
+
+  def getHighestLowest(): Map[String, List[Int]] = {
+    val highestLowestMap: Map[String, List[Int]] = mapdata.map(x => x._1 -> List(x._2.min,x._2.max))
+    highestLowestMap
   }
-*/
+
 
   // *******************************************************************************************************************
 
