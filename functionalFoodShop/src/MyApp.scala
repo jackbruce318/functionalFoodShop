@@ -40,8 +40,8 @@ object MyApp extends App {
   def readOption: Int = {
     println(
       """|Please select one of the following:
-        |  1 - show points for all teams
-        |  2 - show points for selected team
+        |  1 - Get Most Recent Prices
+        |  2 -
         |  3 - quit""".stripMargin)
     readInt()
   }
@@ -60,7 +60,7 @@ object MyApp extends App {
 
   // handlers for menu options
   def handleOne(): Boolean = {
-    //mnuShowPoints(currentPoints) // calls function mnuShowPoints, which invokes function currentPoints
+    mnuShowPrices(getCurrentPrice) // calls function mnuShowPoints, which invokes function currentPoints
     true
   }
 
@@ -106,11 +106,11 @@ object MyApp extends App {
   // FUNCTIONS THAT INVOKE ACTION AND INTERACT WITH USER
   // each of these functions accepts user input if required for an operation,
   // invokes the relevant operation function and displays the results
-/*
-  def mnuShowPoints(f: () => Map[String, List[Int]]) = {
-    f() foreach { case (x, y) => println(s"$x: $y") }
-  }
 
+  def mnuShowPrices(f: () => Map[String, Int]) = {
+        f() map(x => println(x._1 + ": " + x._2 + "p"))
+  }
+/*
   def mnuShowPointsForTeam(f: (String) => (String, Int)) = {
     print("Team>")
     val data = f(readLine)
@@ -121,13 +121,17 @@ object MyApp extends App {
   // OPERATION FUNCTIONS
   // each of these performs the required operation on the data and returns
   // the results to be displayed - does not interact with user
+*/
 
-  def currentPoints(): Map[String, List[Int]] = {
-    // sort map by value in descending order -
-    // see http://alvinalexander.com/scala/how-to-sort-map-in-scala-key-value-sortby-sortwith
-    ListMap(mapdata.toSeq.sortWith(_._2.sum > _._2.sum): _*)
+  def getCurrentPrice(): Map[String, Int] = {
+    val currentPriceMap :Map[String, Int]  = mapdata.map(x => x._1 -> x._2.last)
+
+    currentPriceMap
   }
 
+
+
+/*
   def currentPointsForTeam(team: String): (String, Int) = {
     val points = mapdata.get(team) match{
       case Some(p) => p
@@ -135,8 +139,8 @@ object MyApp extends App {
     }
     (team, points)
   }
-
+*/
 
   // *******************************************************************************************************************
-*/
+
 }

@@ -22,4 +22,12 @@ def readFile(filename: String): Map[String, List[Int]] = {
   mapBuffer
 }
 
-val mapdata = readFile("C:\\Users\\actio\\Documents\\GitHub\\functionalFoodShop\\functionalFoodShop\\data.txt")
+
+
+val mapdata = readFile("C:\\Users\\actio\\Documents\\GitHub\\functionalFoodShop\\functionalFoodShop\\data.txt");
+
+mapdata.map(x => x._2.last)
+
+val newMapData :Map[String, Int]  = mapdata.map(x => x._1 -> x._2.last)
+
+newMapData.map(x => println(x._1 + " " + x._2))
