@@ -21,7 +21,7 @@ object MyApp extends App {
   // for each menu item:
   // key is an Int, the value that will be read from the input
   // value is a function () => Boolean, i.e. no params and returns Boolean
-  val actionMap = Map[Int, () => Boolean](1 -> handleOne, 2 -> handleTwo, 3 -> handleThree)
+  val actionMap = Map[Int, () => Boolean](1 -> handleOne, 2 -> handleTwo, 3 -> handleThree, 4-> handleFour, 6 -> handleSix)
 
   // loop to read input and invoke menu option
   // uses function readOption to show menu and read input
@@ -41,8 +41,10 @@ object MyApp extends App {
     println(
       """|Please select one of the following:
         |  1 - Get Most Recent Prices
-        |  2 -
-        |  3 - quit""".stripMargin)
+        |  2 - View Highest and Lowest Prices
+        |  3 - View Median Prices
+        |  4 - Compare Two Average Prices
+        |  6 - quit""".stripMargin)
     readInt()
   }
 
@@ -65,13 +67,23 @@ object MyApp extends App {
   }
 
   def handleTwo(): Boolean = {
-    //mnuShowPointsForTeam(currentPointsForTeam)
+    mnuHighestLowest(getHighestLowest)
     true
   }
 
-  def handleThree(): Boolean = {
+  def handleSix(): Boolean = {
     println("selected quit") // returns false so loop terminates
     false
+  }
+
+  def handleThree(): Boolean = {
+    mnuMedian(getMedian)
+    true
+  }
+
+  def handleFour(): Boolean = {
+    mnuAvgs(getAvg)
+    true
   }
 
 
@@ -110,18 +122,41 @@ object MyApp extends App {
   def mnuShowPrices(f: () => Map[String, Int]) = {
         f() map(x => println(x._1 + ": " + x._2 + "p"))
   }
-/*
-  def mnuShowPointsForTeam(f: (String) => (String, Int)) = {
-    print("Team>")
-    val data = f(readLine)
-    println(s"${data._1}: ${data._2}")
+
+  def mnuHighestLowest(f: () => Map[String,List[Int]]) = {
+        f() map(x => println(x._1 + ": Lowest: " + x._2.min + "p - Highest: " + x._2.max + "p"))
+  }
+
+  def mnuMedian(f: () => Map[String,Double]) = {
+        f() map(x => println(x._1 + ": Median: " + x._2 + "p"))
+  }
+
+  def mnuAvgs(f: (String, String) => Option[(Map[String, Int], Int)]) = {
+
+    //get foods from user
+    //cast both to upper case since they are all stored that way
+    val food1 = readLine("Enter the first food type: ").toUpperCase()
+    val food2 = readLine("Enter the second food type: ").toUpperCase()
+
+    val avgTupleOption = f(food1, food2)
+    avgTupleOption match {
+      case Some((avgMap, result)) =>
+        //if both foods exist
+        avgMap.map(x => println(x._1 + ": " + x._2 + "p"))
+        println("The difference between these two averages was: " + result)
+
+      case None =>
+        //If any entered food symbols were invalid
+        println("One or both food types could not be found in the data.")
+    }
+
   }
 
   // *******************************************************************************************************************
   // OPERATION FUNCTIONS
   // each of these performs the required operation on the data and returns
   // the results to be displayed - does not interact with user
-*/
+
 
   def getCurrentPrice(): Map[String, Int] = {
     val currentPriceMap :Map[String, Int]  = mapdata.map(x => x._1 -> x._2.last)
@@ -129,17 +164,55 @@ object MyApp extends App {
     currentPriceMap
   }
 
-
-
-/*
-  def currentPointsForTeam(team: String): (String, Int) = {
-    val points = mapdata.get(team) match{
-      case Some(p) => p
-      case None => 0
-    }
-    (team, points)
+  def getMedian(): Map[String, Double] = {
+    val medianMap: Map[String, Double] = mapdata.map(x => x._1 -> median(x._2))
+    medianMap
   }
-*/
+
+
+  def getHighestLowest(): Map[String, List[Int]] = {
+    val highestLowestMap: Map[String, List[Int]] = mapdata.map(x => x._1 -> List(x._2.min,x._2.max))
+    highestLowestMap
+  }
+
+  def getAvg(userInput1: String, userInput2: String): Option[(Map[String, Int], Int)] = {
+    //Use get to check if keys exist
+    val avg1Option = mapdata.get(userInput1).map(data => data.sum / data.length)
+    val avg2Option = mapdata.get(userInput2).map(data => data.sum / data.length)
+
+    //Take the avg value from the option and cast it to an integer value
+    for {
+      avg1 <- avg1Option
+      avg2 <- avg2Option
+    } yield {
+      //This only executes if both keys exist
+      val result = math.abs(avg1 - avg2)
+      val avgMap = Map(userInput1 -> avg1, userInput2 -> avg2)
+      (avgMap, result)
+    }
+  }
+
+
+
+  def median(values: List[Int]): Double = {
+
+    val len = values.length
+
+    //if the length of the list is odd then just return the middle element
+    if (len % 2 == 1) {
+      values(len / 2).toDouble
+    }
+      //if the length is even then return the average of the two middle numbers
+      //in simpler terms - values(len / 2) will return the number on the "right" half of the list, and
+      //values(len / 2 - 1) will return the val on the "left" side of the list
+      //the list was not ordered for this operation as it would not accurately reflect the fluctuation of food prices
+      //over the time period
+    else {
+      val (up, down) = (values(len / 2), values(len / 2 - 1))
+      (up + down) / 2.0
+    }
+  }
+
 
   // *******************************************************************************************************************
 
