@@ -26,8 +26,15 @@ def readFile(filename: String): Map[String, List[Int]] = {
 
 val mapdata = readFile("C:\\Users\\actio\\Documents\\GitHub\\functionalFoodShop\\functionalFoodShop\\data.txt");
 
-mapdata.map(x => x._2.apply(x._2.length / 2))
+val userInput1 = "CHICKEN"
+val userInput2 = "TOMATO"
 
-val newMapData :Map[String, List[Int]]  = mapdata.map(x => x._1 -> List(x._2.min,x._2.max))
+def getAvg(userInput1: String , userInput2: String): Map[String, Int] = {
+  val avg1 = mapdata(userInput1).sum / mapdata(userInput1).length
+  val avg2 = mapdata(userInput2).sum / mapdata(userInput2).length
 
-newMapData.map(x => println(x._1 + " " + x._2))
+  val avgMap = Map(userInput1 -> avg1, userInput2 -> avg2)
+  avgMap
+}
+
+getAvg(userInput1, userInput2)
