@@ -26,7 +26,7 @@ def readFile(filename: String): Map[String, List[Int]] = {
 
 val mapdata = readFile("C:\\Users\\actio\\Documents\\GitHub\\functionalFoodShop\\functionalFoodShop\\data.txt");
 
-mapdata.map(x => x._2.last)
+mapdata.map(x => x._2.apply(x._2.length / 2))
 
 val newMapData :Map[String, List[Int]]  = mapdata.map(x => x._1 -> List(x._2.min,x._2.max))
 

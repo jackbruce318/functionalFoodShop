@@ -21,7 +21,7 @@ object MyApp extends App {
   // for each menu item:
   // key is an Int, the value that will be read from the input
   // value is a function () => Boolean, i.e. no params and returns Boolean
-  val actionMap = Map[Int, () => Boolean](1 -> handleOne, 2 -> handleTwo, 3 -> handleThree)
+  val actionMap = Map[Int, () => Boolean](1 -> handleOne, 2 -> handleTwo, 3 -> handleThree, 6 -> handleSix)
 
   // loop to read input and invoke menu option
   // uses function readOption to show menu and read input
@@ -42,7 +42,8 @@ object MyApp extends App {
       """|Please select one of the following:
         |  1 - Get Most Recent Prices
         |  2 - View Highest and Lowest Prices
-        |  3 - quit""".stripMargin)
+        |  3 - View Median Prices
+        |  6 - quit""".stripMargin)
     readInt()
   }
 
@@ -69,8 +70,13 @@ object MyApp extends App {
     true
   }
 
-  def handleThree(): Boolean = {
+  def handleSix(): Boolean = {
     println("selected quit") // returns false so loop terminates
+    false
+  }
+
+  def handleThree(): Boolean = {
+    mnuMedian(getMedian)
     false
   }
 
@@ -115,6 +121,10 @@ object MyApp extends App {
         f() map(x => println(x._1 + ": Lowest: " + x._2.min + "p - Highest: " + x._2.max + "p"))
   }
 
+  def mnuMedian(f: () => Map[String,Double]) = {
+        f() map(x => println(x._1 + ": Median: " + x._2 + "p"))
+  }
+
   // *******************************************************************************************************************
   // OPERATION FUNCTIONS
   // each of these performs the required operation on the data and returns
@@ -127,12 +137,34 @@ object MyApp extends App {
     currentPriceMap
   }
 
-
+  def getMedian(): Map[String, Double] = {
+    val medianMap: Map[String, Double] = mapdata.map(x => x._1 -> median(x._2))
+    medianMap
+  }
 
 
   def getHighestLowest(): Map[String, List[Int]] = {
     val highestLowestMap: Map[String, List[Int]] = mapdata.map(x => x._1 -> List(x._2.min,x._2.max))
     highestLowestMap
+  }
+
+  def median(values: List[Int]): Double = {
+
+    val len = values.length
+
+    //if the length of the list is odd then just return the middle element
+    if (len % 2 == 1) {
+      values(len / 2).toDouble
+    }
+      //if the length is even then return the average of the two middle numbers
+      //in simpler terms - values(len / 2) will return the number on the "right" half of the list, and
+      //values(len / 2 - 1) will return the val on the "left" side of the list
+      //the list was not ordered for this operation as it would not accurately reflect the fluctuation of food prices
+      //over the time period
+    else {
+      val (up, down) = (values(len / 2), values(len / 2 - 1))
+      (up + down) / 2.0
+    }
   }
 
 
