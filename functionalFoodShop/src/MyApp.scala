@@ -6,6 +6,7 @@ import scala.io.Source
 import scala.io.StdIn.readInt
 import scala.io.StdIn.readLine
 import scala.collection.immutable.ListMap
+import scala.util.{Try, Success, Failure}
 
 object MyApp extends App {
 
@@ -21,7 +22,7 @@ object MyApp extends App {
   // for each menu item:
   // key is an Int, the value that will be read from the input
   // value is a function () => Boolean, i.e. no params and returns Boolean
-  val actionMap = Map[Int, () => Boolean](1 -> handleOne, 2 -> handleTwo, 3 -> handleThree, 4-> handleFour, 6 -> handleSix)
+  val actionMap = Map[Int, () => Boolean](1 -> handleOne, 2 -> handleTwo, 3 -> handleThree, 4-> handleFour, 5 -> handleFive, 6 -> handleSix)
 
   // loop to read input and invoke menu option
   // uses function readOption to show menu and read input
@@ -44,6 +45,7 @@ object MyApp extends App {
         |  2 - View Highest and Lowest Prices
         |  3 - View Median Prices
         |  4 - Compare Two Average Prices
+        |  5 - Build a Basket
         |  6 - quit""".stripMargin)
     readInt()
   }
@@ -83,6 +85,11 @@ object MyApp extends App {
 
   def handleFour(): Boolean = {
     mnuAvgs(getAvg)
+    true
+  }
+
+  def handleFive(): Boolean = {
+    mnuBasket(getBasket)
     true
   }
 
@@ -152,6 +159,85 @@ object MyApp extends App {
 
   }
 
+  def mnuBasket(f: (Map[String, Double]) => Option[(Map[String, Int], List[Double])]) =
+  {
+    val noOfItems: String = readLine("How many items would you like to add to your basket? ")
+
+    def validateInt(input: String): Int = {
+      //Try to convert to int, if it fails then ask again recursively
+      try {
+        input.toInt
+      }
+      catch {
+        case _: NumberFormatException =>
+          val input = readLine("That's not a valid number. Please try again: ")
+          validateInt(input)  //Recursive call to try again
+      }
+    }
+
+
+    def getItemsFromBasket(noItems: Int, acc: Map[String,Double]): Map[String,Double] = {
+      //if the number of items requested have been added, return the map
+      if (noItems == 0) {
+        acc
+      }
+      else {
+        //take inputs for each item
+        val userInput1 = readLine("Which food item do you wish to add? ")
+        val userInput2 = readLine("How many kg you wish to add? ")
+
+        Try(userInput2.toDouble) match {
+          case Success(value) => {
+            //add it to the basket with correct key-value pair
+            val newAcc = acc + (userInput1 -> value)
+            getItemsFromBasket(noItems - 1, newAcc)
+          }
+          case Failure(_) => {
+            println("Invalid Input, skipping item")
+            getItemsFromBasket(noItems - 1, acc)
+          }
+        }
+
+
+      }
+    }
+
+    val intNoOfItems = validateInt(noOfItems)
+    val basketMap: Map[String, Double] = getItemsFromBasket(intNoOfItems, Map.empty)
+
+    val basketTuple = f(basketMap)
+
+    //Process the tuple using pattern matching and recursion
+    basketTuple match {
+      case Some((items, quantities)) => {
+
+        //recursive function to process elements
+        def printTupleEntries(itemEntries: List[(String, Int)], quantities: List[Double],totalCostAcc: Double = 0.0
+        ): Double = {
+          (itemEntries, quantities) match {
+            case (Nil, _) | (_, Nil) =>
+
+              //when either list is empty, stop recursion
+              totalCostAcc
+            case ((item, price) :: remainingItems, quantity :: remainingQuantities) =>
+              //Print current map entry and corresponding quantity
+              println(s"Item: $item, Quantity: $quantity, Price: " + price*quantity + "p")
+              // Recursive call with remaining entries
+              printTupleEntries(remainingItems, remainingQuantities, totalCostAcc + price*quantity)
+          }
+        }
+
+        // Start the recursive printing with the map entries converted to a list
+        val totalCost = printTupleEntries(items.toList, quantities)
+        println(s"Total Cost: $totalCost")
+      }
+      case None =>
+        println("No basket information available")
+    }
+
+
+  }
+
   // *******************************************************************************************************************
   // OPERATION FUNCTIONS
   // each of these performs the required operation on the data and returns
@@ -175,6 +261,7 @@ object MyApp extends App {
     highestLowestMap
   }
 
+  //takes strings inputted by user and returns a tuple containing a Map (Key -> Average) and the difference between both averages (Int)
   def getAvg(userInput1: String, userInput2: String): Option[(Map[String, Int], Int)] = {
     //Use get to check if keys exist
     val avg1Option = mapdata.get(userInput1).map(data => data.sum / data.length)
@@ -211,6 +298,32 @@ object MyApp extends App {
       val (up, down) = (values(len / 2), values(len / 2 - 1))
       (up + down) / 2.0
     }
+  }
+
+  def getBasket(basket: Map[String, Double]): Option[(Map[String, Int], List[Double])] = {
+
+    //This function uses head recursion to build a new map of the selected items and their most recent prices
+    def buildBasketMap(keys: List[String], acc: Map[String, Int]): Map[String, Int] = keys match {
+      case Nil => acc //If list is empty, there are no more items to process
+
+      case head :: tail => //if there are items in the list
+
+        //Look up the current key in mapdata
+        val newAcc = mapdata.get(head) match {
+
+          case Some(prices) => acc + (head -> prices.last) //if an entry is found then add to map here
+          case None => acc //Skip keys not found in mapdata
+        }
+
+        //Recursive call with the tail and updated accumulator
+        buildBasketMap(tail, newAcc)
+    }
+
+    val quantities: List[Double] = basket.values.toList
+
+    // Start recursion with the list of basket keys and an empty map
+    val basketTuple = (buildBasketMap(basket.keys.toList, Map.empty), quantities)
+    Some(basketTuple)
   }
 
 

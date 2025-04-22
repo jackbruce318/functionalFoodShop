@@ -1,4 +1,5 @@
 import scala.io.Source
+import scala.annotation.tailrec
 
 def readFile(filename: String): Map[String, List[Int]] = {
   // create buffer to build up map as we read each line
@@ -38,3 +39,23 @@ def getAvg(userInput1: String , userInput2: String): Map[String, Int] = {
 }
 
 getAvg(userInput1, userInput2)
+
+mapdata.get(userInput1)
+
+
+val noItems = 5
+
+def addItemsToBasket(noItems: Int): Map[String,Double] = {
+
+
+  def iterate(noItems: Int, acc: Map[String,Double]): Map[String,Double] = {
+    if (noItems == 0) {
+      acc
+    } else {
+      val userInput1 = readLine("Which food item do you wish to add? ")
+      acc + (userInput1 -> 10)
+    }
+  }
+
+
+}
