@@ -98,27 +98,23 @@ object MyApp extends App {
   // UTILITY FUNCTIONS
 
   // reads data file - comma separated file
+  //method has been altered in order to be functional rather than imperative
   def readFile(filename: String): Map[String, List[Int]] = {
-    // create buffer to build up map as we read each line
-
-    var mapBuffer: Map[String, List[Int]] = Map()
     try {
-      for (line <- Source.fromFile(filename).getLines()) {
-        // for each line
-        val splitline = line.split(",").map(_.trim).toList // split line at , and convert to List
+      val lines = Source.fromFile(filename).getLines().toList
 
-        // add element to map buffer
-        // splitline is line from file as List, e.g. List(Bayern Munich, 24)
-        // use head as key
-        // tail is a list, but need just the first (only in this case) element, so use head of tail and convert to int
-        mapBuffer = mapBuffer ++ Map(splitline.head -> splitline.tail.map(_.toInt))
-
+      lines.foldLeft(Map.empty[String, List[Int]]) { (acc, line) =>
+        val splitline = line.split(",").map(_.trim).toList
+        //Use head as key and tail as the list of values
+        acc + (splitline.head -> splitline.tail.map(_.toInt))
       }
     } catch {
-      case ex: Exception => println("Sorry, an exception happened.")
+      case ex: Exception =>
+        println("Sorry, an exception happened.")
+        Map.empty[String, List[Int]]
     }
-    mapBuffer
   }
+
 
 
   // *******************************************************************************************************************
