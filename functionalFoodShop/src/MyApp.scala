@@ -1,7 +1,3 @@
-/**
-  * Created by jim on 06/11/2016.
-  */
-
 import scala.io.Source
 import scala.io.StdIn.readInt
 import scala.io.StdIn.readLine
