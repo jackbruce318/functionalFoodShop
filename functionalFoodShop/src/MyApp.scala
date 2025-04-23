@@ -47,7 +47,15 @@ object MyApp extends App {
         |  4 - Compare Two Average Prices
         |  5 - Build a Basket
         |  6 - quit""".stripMargin)
-    readInt()
+    try{
+      readInt()
+    }
+    catch{
+      //used recursion here to have the user always returned to the menu
+      case _: NumberFormatException =>
+        println("Invalid input, please try again")
+        readOption
+    }
   }
 
   // invokes selected menu option
@@ -162,7 +170,7 @@ object MyApp extends App {
     def validateInt(input: String): Int = {
       //Try to convert to int, if it fails then ask again recursively
       try {
-        input.toInt
+        math.abs(input.toInt)
       }
       catch {
         case _: NumberFormatException =>
@@ -179,18 +187,30 @@ object MyApp extends App {
       }
       else {
         //take inputs for each item
-        val userInput1 = readLine("Which food item do you wish to add? ")
+        val userInput1 = readLine("Which food item do you wish to add? ").toUpperCase()
         val userInput2 = readLine("How many kg you wish to add? ")
 
-        Try(userInput2.toDouble) match {
-          case Success(value) => {
-            //add it to the basket with correct key-value pair
-            val newAcc = acc + (userInput1 -> value)
-            getItemsFromBasket(noItems - 1, newAcc)
+
+        mapdata.get(userInput1) match {
+          //if get method returns values
+          case Some(prices) => {
+            //then test the second input
+            Try(math.abs(userInput2.toDouble)) match {
+              case Success(value) => {
+                //add it to the basket with correct key-value pair
+                val newAcc = acc + (userInput1 -> value)
+                getItemsFromBasket(noItems - 1, newAcc)
+              }
+              case Failure(_) => {
+                println("Invalid Input, try again")
+                getItemsFromBasket(noItems, acc)
+              }
+            }
           }
-          case Failure(_) => {
-            println("Invalid Input, skipping item")
-            getItemsFromBasket(noItems - 1, acc)
+          //if None is returned, item is skipped
+          case None => {
+            println("Invalid Input, try again")
+            getItemsFromBasket(noItems, acc)
           }
         }
 
@@ -218,7 +238,7 @@ object MyApp extends App {
             case ((item, price) :: remainingItems, quantity :: remainingQuantities) =>
               //Print current map entry and corresponding quantity
               println(s"Item: $item, Quantity: $quantity, Price: " + price*quantity + "p")
-              // Recursive call with remaining entries
+              //Recursive call with remaining entries
               printTupleEntries(remainingItems, remainingQuantities, totalCostAcc + price*quantity)
           }
         }
